@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Client Intake Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    .dashboard {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .stage {
+      flex: 1 1 300px;
+      border: 1px solid #ccc;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+    }
+    .stage h2 {
+      margin-top: 0;
+      font-size: 1.2em;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+    }
+    .stage label {
+      display: block;
+      margin-bottom: 8px;
+    }
+    input[type="checkbox"]:disabled {
+      accent-color: green;
+    }
+  </style>
+
+  <!-- SharePoint JSOM libraries -->
+  <script src="/_layouts/15/SP.Runtime.js"></script>
+  <script src="/_layouts/15/SP.js"></script>
+</head>
+<body>
+  <h1>📋 Sales Stage Progress Dashboard</h1>
+  <div class="dashboard">
+    <div class="stage">
+      <h2>Scope</h2>
+      <label><input type="checkbox" id="scope-1"> Intake Form Started</label>
+      <label><input type="checkbox" id="scope-2"> Knowledge Graph Uploaded</label>
+      <label><input type="checkbox" id="scope-3"> Source Materials Collected</label>
+    </div>
+    <div class="stage">
+      <h2>Learning Objectives</h2>
+      <label><input type="checkbox" id="objectives-1"> Session Objectives</label>
+      <label><input type="checkbox" id="objectives-2"> Outcome Alignment</label>
+    </div>
+    <div class="stage">
+      <h2>Instructional Design</h2>
+      <label><input type="checkbox" id="id-1"> Script Outline</label>
+      <label><input type="checkbox" id="id-2"> Storyboard</label>
+    </div>
+    <div class="stage">
+      <h2>Content Development</h2>
+      <label><input type="checkbox" id="content-1"> First Draft</label>
+      <label><input type="checkbox" id="content-2"> Client Edits</label>
+      <label><input type="checkbox" id="content-3"> Final Content</label>
+    </div>
+    <div class="stage">
+      <h2>Media</h2>
+      <label><input type="checkbox" id="media-1"> Voiceovers</label>
+      <label><input type="checkbox" id="media-2"> Graphics</label>
+      <label><input type="checkbox" id="media-3"> Animation</label>
+    </div>
+    <div class="stage">
+      <h2>Delivery</h2>
+      <label><input type="checkbox" id="delivery-1"> SCORM Package</label>
+      <label><input type="checkbox" id="delivery-2"> LMS Upload</label>
+    </div>
+  </div>
+
+  <script>
+    function checkFileExists(path, cb) {
+      const ctx = SP.ClientContext.get_current();
+      const file = ctx.get_web().getFileByServerRelativeUrl(path);
+      ctx.load(file);
+      ctx.executeQueryAsync(
+        () => cb(true),
+        () => cb(false)
+      );
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const boxes = document.querySelectorAll("input[type='checkbox']");
+      boxes.forEach(box => {
+        const saved = localStorage.getItem(box.id);
+        if (saved !== null) box.checked = saved === "true";
+        box.addEventListener("change", () => {
+          localStorage.setItem(box.id, box.checked);
+        });
+      });
+
+      // Check for Knowledge Graph file
+      checkFileExists("/sites/PSI-AIClientPortal/Shared Documents/_Projects/CMAA/SOW_CMAA_App/Content/Knowledge Graphs.xlsx", exists => {
+        const checkbox = document.getElementById("scope-2");
+        if (exists && checkbox) {
+          checkbox.checked = true;
+          checkbox.disabled = true;
+          localStorage.setItem(checkbox.id, "true");
+        }
+      });
+    });
+  </script>
+</body>
+</html>
